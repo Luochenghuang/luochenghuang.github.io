@@ -2,25 +2,24 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Moto. Etc.
+subtitle: Research scientist at Meta.
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: avatar.png
   image_circular: false # crops the image to make it circular
   more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
+    <p>10301 Willows Rd NE</p>
+    <p>Redmond, WA 98052</p>
 
-news: true  # includes a list of news items
-latest_posts: true  # includes a list of the newest posts
+news: false # includes a list of news items
+latest_posts: false # includes a list of the newest posts
 selected_papers: true # includes a list of papers marked as "selected={true}"
-social: true  # includes social icons at the bottom of the page
+social: true # includes social icons at the bottom of the page
 ---
 
-Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+As a relentless inquirer into the nature of the physical world, my enduring drive is to broaden my intellectual horizons and deepen my understanding of our complex universe.
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+Professionally, I am engaged in the exciting field of developing diffractive optical systems. It is a privilege to work at the frontier of novel optical technologies, given my long-standing passion for optics. Coding presents another area of professional interest for me, where I find immense satisfaction and fun.
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+Outside the laboratory, my hobbies pull together the threads of creativity and aesthetics. Tinkering with tunes on the piano, capturing visual narratives through photography, and expressing my imagination through crafting enable me to balance my intensely technical work with artful leisure activities.

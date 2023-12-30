@@ -9,82 +9,127 @@
 - title: Education
   type: time_table
   contents:
-    - title: PhD
+    - title: Ph.D.
       institution: University of Washington, Seattle, Washington, USA
       year: 2023
       description:
-        - Description 1.
-    - title: Federal teaching diploma
-      institution: Eidgenössische Technische Hochschule, Zurich, Switzerland
-      year: 1900
+        - Electrical and Computer Engineering
+    - title: M.S.
+      institution: University of Washington, Seattle, Washington, USA
+      year: 2019
       description:
-        - Description 1.
-        - Description 2.
+        - Materials Science and Engineering
+    - title: B.S.
+      institution: University of Washington, Seattle, Washington, USA
+      year: 2017
+      description:
+        - Materials Science and Engineering, minor in Mathematics.
 
 - title: Experience
   type: time_table
   contents:
-    - title: Professor of Theoretical Physics
-      institution: Institute for Advanced Study, Princeton University
-      year: 1933 - 1955
+    - title: Optical Simulation Engineer
+      institution: Meta, Redmond, WA
+      year: 2023
       description:
-        - Description 1.
-        - Description 2.
-        - title: Description 3.
-          contents:
-            - Sub-description 1.
-            - Sub-description 2.
-    - title: Visiting Professor
-      institution: California Institute of Technology, Pasadena, California, US
-      year: 1933
+        - Worked on PVH waveguide related design and optimization.
+    - title: Postdoctoral Fellow
+      institution: University of Washington, Seattle, WA.
+      year: 2023
       description:
-        - Description 1.
-        - Description 2.
+        - Developed <a href="https://github.com/Luochenghuang/metabox">metabox</a>, a multi-scale optimization framework for diffractive optical systems.
 
-    - title: Director
-      institution: Kaiser Wilhelm Institute for Physics, Berlin, Germany.
-      year: 1917-1933
-
-    - title: Professor of Theoretical Physics
-      institution: Karl-Ferdinand University, Prague, Czechoslovakia
-      year: 1911 - 1917
+    - title: Research Scientist Intern
+      institution: Meta Reality Labs, Redmond, WA.
+      year: 2022
       description:
+        - Developed sampling, suorrogate modeling, and optimization pipelines for diffractive optics.
 
-    - title: Associate Professor of Theoretical Physics
-      institution: University of Zurich, Zurich, Switzerland
-      year: 1909 - 1911
+    - title: Graduate Research Assistant
+      institution: University of Washington, Seattle, WA.
+      year: 2019 - 2023
+      items:
+        - Broadband Thermal Meta-optics
+          -  Employed an inverse-design framework to create broadband meta-optics operating in the long-wave infrared (LWIR) regime (8-12 μm).
+        - Optical Neural Network
+          -  Designed an incoherent optical neural network capable of classifying MNIST characters using a meta-optical doublet.
+        - Meta-optical Fiber Endoscope
+          -  Designed large meta-optics for real time full-color imaging in a meta-optical fiber endoscope.
+        - Polarization Sensitive Foveated LWIR meta-optics
+          -  Designed polarization sensitive meta-optics in the LWIR regime, which has polarization multiplexed focal lengths.
+        - All-silicon LWIR Metalens
+          -  Built a metalens imaging platform in the long wavelength infrared (LWIR).
+        - Inverse Designed Achromatic LWIR
+          -  Inverse designed an achromatic LWIR imaging system, which is currently being fabricated. The optimization of the optics is enabled by techniques such as automatic differentiation and deep learning.
+        - Liquid Crystal Tunable Metasurface
+          -  Designed metasurfaces with tunable functionalities such as notch filters and beam steering using liquid crystal. Fabricated these metasurface for liquid crystal integration.
+        - Extended Depth of Focus Metasurface
+          - Built an achromatic imaging platform combining the form factor of ultra-thin metasurface and computational imaging. This imaging system utilizes the extended depth of focus (EDOF) property to enable full-color imaging.
+        - Forward Designed Composite Metasurface
+          - Developed a doublet metasurface fabrication process flow. Designed metasurface doublets using Zemax. Developed python script to automate optimization and analyses on Zemax.
+        - Simulation Parallelization
+          - Developed pipelines to run RCWA and FDTD simulations on the UW high performance computing cluster to considerably speed up the simulation workflows.
+
+    - title: Trainee
+      institution: University of Washington - DIRECT Program, Seattle, WA.
+      year: 2017 - 2018
+      items:
+        - Developed Thermoelectric Materials Artifical Neural Network (<a href="https://github.com/Luochenghuang/TEMANN/">TEMANN</a>), a python package that can be used to predict Seebeck coefficients for novel materials.
+        - Completed courses on various topics concerning artificial neural networks including architectures, hyper-parameter tuning, regularization, optimization, etc.
+
+- title: Leadership and Teaching Experience
+  type: time_table
+  contents:
+    - title: Teaching Assistant
+      institution: University of Washington, Seattle, WA
+      year: 2019 - 2021
+      description: Held quiz sections and office hours for EE215 and EE299.
+    - title: President
+      institution: American Ceramic Society – Keramos UW Chapter
+      year: 2016 - 2017
+      description: Organized weekly meetings, and coordinated out reach events.
 
 - title: Open Source Projects
   type: time_table
   contents:
-    - title: <a href="https://github.com/alshedivat/al-folio">al-folio</a>
-      year: 2015-now
-      description: A beautiful, simple, clean, and responsive Jekyll theme for academics.
+    - title: <a href="https://github.com/Luochenghuang/metabox">metabox</a>
+      year: 2023-now
+      description: A multi-scale differential optimization framework for diffractive optical systems.
 
 - title: Honors and Awards
   type: time_table
   contents:
-    - year: 1921
+    - year: 2022
       items:
-        - Nobel Prize in Physics
-        - Matteucci Medal
-    - year: 2029
+        - Best Applied Research, ECE, UW
+    - year: 2016
       items:
-        - Max Planck Medal
+        - Livingston Wernecke Memorial Scholarship, UW
+        - James I. Mueller Scholarship, UW
+    - year: 2014
+      items:
+        - Composers Guild 44th Annual Composition Contest, Utah
+        - Utah Best of Young Composer & 2nd Prize & Best of Age Group, Utah
+    - year: 2013
+      items:
+        - National Scholastic Art & Writing Silver Medalist, New York
+        - Utah State Math Contest 1st Team Award & Finalist, Utah
 
 - title: Academic Interests
   type: nested_list
   contents:
-    - title: Topic 1.
+    - title: Metasurface
       items:
-        - Description 1.
-        - Description 2.
-    - title: Topic 2.
+        - Broadband imaging
+        - Inverse design
+        - Long wave infrered imaging
+        - Extended depth of focus
+    - title: Machine learning
       items:
-        - Description 1.
-        - Description 2.
+        - Optical neural network
+        - Surrogate modeling
 
 - title: Other Interests
   type: list
   contents:
-    - <u>Hobbies:</u> Hobby 1, Hobby 2, etc.
+    - <u>Hobbies:</u> Musical composition, photography, woodworking.
