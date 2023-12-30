@@ -1,9 +1,9 @@
 ---
 layout: page
-title: project 1
+title: Musical Compositions
 description: placeholder
 importance: 1
-category: work
+category: music
 ---
 
-Words about the project.
+Placeholder for my musical compositions.

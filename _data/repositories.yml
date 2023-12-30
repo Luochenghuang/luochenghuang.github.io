@@ -1,5 +1,6 @@
-github_users:
-  - luochenghuang
-
 github_repos:
   - luochenghuang/metabox
+  - luochenghuang/TEMANN
+  - luochenghuang/ToxNet
+  - luochenghuang/advent-of-code
+  - luochenghuang/sudoku_solver
