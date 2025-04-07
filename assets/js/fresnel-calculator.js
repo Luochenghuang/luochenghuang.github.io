@@ -83,7 +83,7 @@ const FresnelCalculator = {
      * Updates the plot with new data
      */
     updatePlot() {
-      const angles = Array.from({length: 90}, (_, i) => i);
+      const angles = Array.from({length: 91}, (_, i) => i);
       const rsData = angles.map(theta => this.calculateRs(theta));
       const rpData = angles.map(theta => this.calculateRp(theta));
 
