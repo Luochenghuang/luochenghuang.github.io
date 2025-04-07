@@ -1,7 +1,7 @@
 ---
 layout: page
 permalink: /patents/
-title: patents
+title: Patents
 description: # My patents listed in reverse chronological order
 nav: true
 nav_order: 3

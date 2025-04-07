@@ -1,7 +1,7 @@
 ---
 layout: page
 permalink: /music/
-title: music
+title: Music
 description: Here's a collection of songs I've composed.
 nav: true
 nav_order: 4
