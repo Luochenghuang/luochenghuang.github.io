@@ -14,9 +14,8 @@ profile:
 
 news: false # includes a list of news items
 latest_posts: false # includes a list of the newest posts
-selected_papers: true # includes a list of papers marked as "selected={true}"
+selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I am a researcher in optics. Outside work, I enjoy programming, making/playing music, woodworking, photography, and skate/long/snow-boarding.
-Hit me up if you want to connect! I'm always looking for friends with similar interests.
+I am a researcher in computational optics, inverse design, and machine learning. Outside work, I enjoy making music, woodworking, photography, skateboarding.
