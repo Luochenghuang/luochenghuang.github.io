@@ -18,4 +18,4 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I am a researcher in computational optics, inverse design, and machine learning. Outside work, I enjoy making music, woodworking, photography, skateboarding.
+I am a researcher in computational optics, inverse design, and machine learning. Outside work, I enjoy making music, woodworking, photography, and skateboarding.
