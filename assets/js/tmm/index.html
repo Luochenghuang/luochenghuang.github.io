@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Matrix Method (TMM) Calculator</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .tmm-app {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 0.5rem;
+        }
+        .wavelength-controls {
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .wavelength-inputs {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .wavelength-inputs .input-group {
+            margin-bottom: 0;
+        }
+        .layers-controls {
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .layer {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .layer-inputs {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .input-group label {
+            min-width: 40px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 0.25rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        button {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .remove-button {
+            background-color: #f44336;
+        }
+        .add-button {
+            margin-top: 0.5rem;
+            background-color: #2196F3;
+        }
+        .calculate-button {
+            align-self: flex-start;
+            font-size: 1em;
+            padding: 0.5rem 1rem;
+        }
+        .plot {
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .normal-plot, .angle-plot, .transmittance-plot {
+            margin-top: 0.5rem;
+        }
+        .plot-container {
+            width: 100%;
+            position: relative;
+            padding-bottom: 100%;
+        }
+        .plot-container > div {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+        }
+        .semi-infinite {
+            color: #666;
+            font-size: 1.2em;
+            margin-left: 0.25rem;
+        }
+        input[type="number"]:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="app"></div>
+    </div>
+
+    <script type="module">
+        import { calculateRT, generateWavelengthArray } from './TMMCalculator.js';
+        import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+        const TMMApp = {
+            template: `
+                <div class="tmm-app">
+                    <div class="wavelength-controls">
+                        <h3>Wavelength Range</h3>
+                        <div class="wavelength-inputs">
+                            <div class="input-group">
+                                <label>Start (nm):</label>
+                                <input type="number" v-model.number="wavelengthRange.start" min="200" max="2000" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label>End (nm):</label>
+                                <input type="number" v-model.number="wavelengthRange.end" min="200" max="2000" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label>Points:</label>
+                                <input type="number" v-model.number="wavelengthRange.points" min="10" max="1000" step="1">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Polarization:</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" v-model="polarization.TE"> TE
+                                </label>
+                                <label>
+                                    <input type="checkbox" v-model="polarization.TM"> TM
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layers-controls">
+                        <h3>Layers</h3>
+                        <div v-for="(layer, index) in layers" :key="index" class="layer">
+                            <div class="layer-inputs">
+                                <div class="input-group">
+                                    <label>n:</label>
+                                    <input type="number" v-model.number="layer.n" min="1" step="0.01">
+                                </div>
+                                <div class="input-group">
+                                    <label>k:</label>
+                                    <input type="number" v-model.number="layer.k" min="0" step="0.01">
+                                </div>
+                                <template v-if="index !== 0 && index !== layers.length - 1">
+                                    <div class="input-group">
+                                        <label>Thickness (nm):</label>
+                                        <input type="number" v-model.number="layer.d" min="1" step="1">
+                                    </div>
+                                    <button @click="removeLayer(index)" class="remove-btn">Remove</button>
+                                </template>
+                                <template v-else>
+                                    <div class="input-group">
+                                        <label>Thickness:</label>
+                                        <span class="semi-infinite">∞</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <button @click="addLayer" class="add-btn">Add Layer</button>
+                    </div>
+
+                    <button @click="calculate" class="calculate-btn">Calculate</button>
+
+                    <div class="plots">
+                        <div class="plot-container">
+                            <h3>Spectral Response</h3>
+                            <div ref="normalPlot"></div>
+                        </div>
+                        <div class="plot-container">
+                            <h3>Spectral Angular Transmittance</h3>
+                            <div ref="transmittancePlot"></div>
+                        </div>
+                        <div class="plot-container">
+                            <h3>Spectral Angular Reflectance</h3>
+                            <div ref="reflectancePlot"></div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    wavelengthRange: {
+                        start: 550,
+                        end: 700,
+                        points: 100
+                    },
+                    polarization: {
+                        TE: false,
+                        TM: true
+                    },
+                    layers: [
+                        { n: 1.0, k: 0, d: 0 },  // Air
+                        { n: 2.0, k: 0, d: 100 }, // Example layer
+                        { n: 1.0, k: 0, d: 0 }   // Air
+                    ],
+                    normalPlot: null,
+                    transmittancePlot: null,
+                    reflectancePlot: null
+                };
+            },
+            methods: {
+                addLayer() {
+                    this.layers.splice(-1, 0, { n: 1.5, k: 0, d: 100 });
+                },
+                removeLayer(index) {
+                    if (this.layers.length > 2) {
+                        this.layers.splice(index, 1);
+                    }
+                },
+                calculate() {
+                    const wavelengths = generateWavelengthArray(
+                        this.wavelengthRange.start,
+                        this.wavelengthRange.end,
+                        this.wavelengthRange.points
+                    );
+
+                    const angles = Array.from({length: 91}, (_, i) => i);
+                    
+                    // Calculate data for all wavelengths and angles
+                    const transmittanceData = [];
+                    const reflectanceData = [];
+                    for (let angle of angles) {
+                        const transmittanceRow = [];
+                        const reflectanceRow = [];
+                        for (let wavelength of wavelengths) {
+                            const { R, T } = calculateRT(this.layers, wavelength, angle, this.polarization);
+                            transmittanceRow.push(T);
+                            reflectanceRow.push(R);
+                        }
+                        transmittanceData.push(transmittanceRow);
+                        reflectanceData.push(reflectanceRow);
+                    }
+
+                    // Calculate normal incidence data
+                    const normalData = wavelengths.map(wavelength => {
+                        const { R, T } = calculateRT(this.layers, wavelength, 0, this.polarization);
+                        return { wavelength, R, T };
+                    });
+
+                    this.updateNormalPlot(normalData);
+                    this.updateTransmittancePlot(wavelengths, angles, transmittanceData);
+                    this.updateReflectancePlot(wavelengths, angles, reflectanceData);
+                },
+                updateNormalPlot(data) {
+                    const trace1 = {
+                        x: data.map(d => d.wavelength),
+                        y: data.map(d => d.R),
+                        name: 'Reflectance',
+                        type: 'scatter',
+                        line: { color: 'rgb(255, 99, 132)' }
+                    };
+
+                    const trace2 = {
+                        x: data.map(d => d.wavelength),
+                        y: data.map(d => d.T),
+                        name: 'Transmittance',
+                        type: 'scatter',
+                        line: { color: 'rgb(54, 162, 235)' }
+                    };
+
+                    const layout = {
+                        title: 'Spectral Response',
+                        xaxis: {
+                            title: 'Wavelength (nm)'
+                        },
+                        yaxis: {
+                            title: 'Reflectance/Transmittance',
+                            range: [0, 1]
+                        },
+                        showlegend: true,
+                        legend: {
+                            x: 0.02,
+                            y: 0.98,
+                            bgcolor: 'rgba(255, 255, 255, 0.8)'
+                        }
+                    };
+
+                    Plotly.newPlot(this.$refs.normalPlot, [trace1, trace2], layout);
+                },
+                updateTransmittancePlot(wavelengths, angles, data) {
+                    const trace = {
+                        z: data,
+                        x: wavelengths,
+                        y: angles,
+                        type: 'heatmap',
+                        colorscale: 'Viridis',
+                        colorbar: {
+                            title: 'Transmittance'
+                        }
+                    };
+
+                    const layout = {
+                        title: 'Spectral Angular Transmittance',
+                        xaxis: {
+                            title: 'Wavelength (nm)'
+                        },
+                        yaxis: {
+                            title: 'Angle (degrees)'
+                        }
+                    };
+
+                    Plotly.newPlot(this.$refs.transmittancePlot, [trace], layout);
+                },
+                updateReflectancePlot(wavelengths, angles, data) {
+                    const trace = {
+                        z: data,
+                        x: wavelengths,
+                        y: angles,
+                        type: 'heatmap',
+                        colorscale: 'Viridis',
+                        colorbar: {
+                            title: 'Reflectance'
+                        }
+                    };
+
+                    const layout = {
+                        title: 'Spectral Angular Reflectance',
+                        xaxis: {
+                            title: 'Wavelength (nm)'
+                        },
+                        yaxis: {
+                            title: 'Angle (degrees)'
+                        }
+                    };
+
+                    Plotly.newPlot(this.$refs.reflectancePlot, [trace], layout);
+                }
+            },
+            mounted() {
+                this.calculate();
+            }
+        };
+
+        const app = createApp(TMMApp);
+        app.mount('#app');
+    </script>
+</body>
+</html> 
