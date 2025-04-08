@@ -214,6 +214,10 @@
                                         <label>Thickness (nm):</label>
                                         <input type="number" v-model.number="layer.d" min="1" step="1">
                                     </div>
+                                    <div class="input-group">
+                                        <label>Add to pair:</label>
+                                        <input type="checkbox" v-model="layer.addToPair">
+                                    </div>
                                     <button @click="removeLayer(index)" class="remove-btn">Remove</button>
                                 </template>
                                 <template v-else>
@@ -225,6 +229,15 @@
                             </div>
                         </div>
                         <button @click="addLayer" class="add-btn">Add Layer</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Number of pairs:</label>
+                        <input type="number" v-model.number="numberOfPairs" min="2" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Enable Pairs:</label>
+                        <input type="checkbox" v-model="enablePairs">
                     </div>
 
                     <button @click="calculate" class="calculate-btn">Calculate</button>
@@ -263,12 +276,14 @@
                     ],
                     normalPlot: null,
                     transmittancePlot: null,
-                    reflectancePlot: null
+                    reflectancePlot: null,
+                    numberOfPairs: 2,
+                    enablePairs: false
                 };
             },
             methods: {
                 addLayer() {
-                    this.layers.splice(-1, 0, { n: 1.5, k: 0, d: 100 });
+                    this.layers.splice(-1, 0, { n: 1.5, k: 0, d: 100, addToPair: false });
                 },
                 removeLayer(index) {
                     if (this.layers.length > 2) {
@@ -276,6 +291,28 @@
                     }
                 },
                 calculate() {
+                    if (this.enablePairs) {
+                        const pairLayers = this.layers.filter(layer => layer.addToPair);
+                        if (pairLayers.length < 2) {
+                            alert('Error: Paired layers must be at least 2.');
+                            return;
+                        }
+                        // Check if paired layers are contiguous
+                        const indices = this.layers.map((layer, index) => layer.addToPair ? index : -1).filter(index => index !== -1);
+                        console.log('Paired Layer Indices:', indices);
+                        const areContiguous = indices.every((value, index) => index === 0 || value === indices[index - 1] + 1);
+                        if (!areContiguous) {
+                            alert('Error: Paired layers must be contiguous.');
+                            return;
+                        }
+                        const repeatedPairs = Array(this.numberOfPairs).fill(pairLayers).flat();
+                        const calculationLayers = [this.layers[0], ...repeatedPairs, this.layers[this.layers.length - 1]];
+                        this.performCalculation(calculationLayers);
+                    } else {
+                        this.performCalculation(this.layers);
+                    }
+                },
+                performCalculation(layers) {
                     const wavelengths = generateWavelengthArray(
                         this.wavelengthRange.start,
                         this.wavelengthRange.end,
@@ -291,7 +328,7 @@
                         const transmittanceRow = [];
                         const reflectanceRow = [];
                         for (let wavelength of wavelengths) {
-                            const { R, T } = calculateRT(this.layers, wavelength, angle, this.polarization);
+                            const { R, T } = calculateRT(layers, wavelength, angle, this.polarization);
                             transmittanceRow.push(T);
                             reflectanceRow.push(R);
                         }
@@ -301,7 +338,7 @@
 
                     // Calculate normal incidence data
                     const normalData = wavelengths.map(wavelength => {
-                        const { R, T } = calculateRT(this.layers, wavelength, 0, this.polarization);
+                        const { R, T } = calculateRT(layers, wavelength, 0, this.polarization);
                         return { wavelength, R, T };
                     });
 
