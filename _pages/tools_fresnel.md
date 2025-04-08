@@ -2,7 +2,7 @@
 layout: page
 permalink: /tools_fresnel/
 title: Fresnel Reflection Calculator
-description: Calculates Fresnel reflection coefficients.
+description: Calculates Fresnel reflection coefficients. Copyright © 2025, Luocheng Huang.
 nav: false
 ---
 
