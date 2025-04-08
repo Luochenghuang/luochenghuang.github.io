@@ -42,7 +42,7 @@ function calculateLayerMatrix(n, k, d, wavelength, angle, polarization) {
     if (polarization === 'TE') {
         A = cos_beta_d;
         B = math.divide(math.multiply(sin_beta_d, math.complex(1, 0)), beta);
-        C = math.multiply(math.divide(sin_beta_d, beta), math.complex(-1, 0));
+        C = math.multiply(math.multiply(sin_beta_d, beta), math.complex(-1, 0));
         D = cos_beta_d;
     } else { // TM
         const n_squared = math.multiply(n_complex, n_complex);
@@ -156,8 +156,8 @@ export function calculateRT(layers, wavelength, angle, polarization) {
         M = inverseMatrix(M);
         
         // Get refractive indices for incident and transmitted media
-        const ni = pol === 'TE' ? math.complex(1, 0) : math.complex(layers[0].n, layers[0].k);
-        const nt = pol === 'TE' ? math.complex(1, 0) : math.complex(layers[layers.length - 1].n, layers[layers.length - 1].k);
+        const ni = math.complex(layers[0].n, layers[0].k);
+        const nt = math.complex(layers[layers.length - 1].n, layers[layers.length - 1].k);
         
         // Calculate beta for incident and transmitted media
         const k0 = 2 * Math.PI / (wavelength * 1e-9);
@@ -182,7 +182,7 @@ export function calculateRT(layers, wavelength, angle, polarization) {
         );
         
         const r = math.divide(
-            math.add(
+            math.subtract(
                 numerator_r,
                 math.multiply(math.complex(0, 1), math.add(term3, term4))
             ),
