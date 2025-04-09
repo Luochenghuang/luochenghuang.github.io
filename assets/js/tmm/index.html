@@ -109,15 +109,15 @@
         }
         .plot-container {
             width: 100%;
-            position: relative;
-            padding-bottom: 100%;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
         }
         .plot-container > div {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
+            height: 400px;
         }
         h3 {
             margin-top: 0;
@@ -154,6 +154,68 @@
             background-color: #cccccc;
             cursor: not-allowed;
         }
+        .pair-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+        .angle-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 18px;
+            line-height: 18px;
+            width: auto;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0.25rem;
+            flex-shrink: 0;
+        }
+        .angle-control input[type="range"] {
+            flex: 1;
+            max-width: 120px;
+            margin: 0;
+            padding: 0;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #ddd;
+            border-radius: 2px;
+            outline: none;
+        }
+        .angle-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .angle-control input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .angle-control span {
+            min-width: 25px;
+            text-align: right;
+            padding: 0;
+            line-height: 18px;
+        }
+        .angle-control label {
+            font-weight: bold;
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+            line-height: 18px;
+        }
     </style>
 </head>
 <body>
@@ -182,17 +244,6 @@
                             <div class="input-group">
                                 <label>Points:</label>
                                 <input type="number" v-model.number="wavelengthRange.points" min="10" max="1000" step="1">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Polarization:</label>
-                            <div class="checkbox-group">
-                                <label>
-                                    <input type="checkbox" v-model="polarization.TE"> TE
-                                </label>
-                                <label>
-                                    <input type="checkbox" v-model="polarization.TM"> TM
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -229,31 +280,49 @@
                             </div>
                         </div>
                         <button @click="addLayer" class="add-btn">Add Layer</button>
-                    </div>
-
-                    <div class="input-group">
-                        <label>Number of pairs:</label>
-                        <input type="number" v-model.number="numberOfPairs" min="2" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Enable Pairs:</label>
-                        <input type="checkbox" v-model="enablePairs">
+                        <div class="pair-controls">
+                            <div class="input-group">
+                                <label>Enable Pairs:</label>
+                                <input type="checkbox" v-model="enablePairs">
+                            </div>
+                            <div class="input-group">
+                                <label>Number of pairs:</label>
+                                <input type="number" v-model.number="numberOfPairs" min="2" step="1">
+                            </div>
+                        </div>
                     </div>
 
                     <button @click="calculate" class="calculate-btn">Calculate</button>
 
                     <div class="plots">
-                        <div class="plot-container">
-                            <h3>Spectral Response</h3>
-                            <div ref="normalPlot"></div>
+                        <div class="angle-control">
+                            <label>Angle:</label>
+                            <input type="range" v-model.number="spectralAngle" min="0" max="90" step="1">
+                            <span>{{ spectralAngle }}°</span>
                         </div>
                         <div class="plot-container">
-                            <h3>Spectral Angular Transmittance</h3>
-                            <div ref="transmittancePlot"></div>
+                            <h3>Spectral Response (TE)</h3>
+                            <div ref="normalPlotTE"></div>
                         </div>
                         <div class="plot-container">
-                            <h3>Spectral Angular Reflectance</h3>
-                            <div ref="reflectancePlot"></div>
+                            <h3>Spectral Response (TM)</h3>
+                            <div ref="normalPlotTM"></div>
+                        </div>
+                        <div class="plot-container">
+                            <h3>Spectral Angular Transmittance (TE)</h3>
+                            <div ref="transmittancePlotTE"></div>
+                        </div>
+                        <div class="plot-container">
+                            <h3>Spectral Angular Transmittance (TM)</h3>
+                            <div ref="transmittancePlotTM"></div>
+                        </div>
+                        <div class="plot-container">
+                            <h3>Spectral Angular Reflectance (TE)</h3>
+                            <div ref="reflectancePlotTE"></div>
+                        </div>
+                        <div class="plot-container">
+                            <h3>Spectral Angular Reflectance (TM)</h3>
+                            <div ref="reflectancePlotTM"></div>
                         </div>
                     </div>
                 </div>
@@ -265,20 +334,20 @@
                         end: 700,
                         points: 100
                     },
-                    polarization: {
-                        TE: false,
-                        TM: true
-                    },
                     layers: [
                         { n: 1.0, k: 0, d: 0 },  // Air
                         { n: 3.5, k: 0, d: 300 }, // Example layer
                         { n: 1.0, k: 0, d: 0 }   // Air
                     ],
-                    normalPlot: null,
-                    transmittancePlot: null,
-                    reflectancePlot: null,
+                    normalPlotTE: null,
+                    normalPlotTM: null,
+                    transmittancePlotTE: null,
+                    transmittancePlotTM: null,
+                    reflectancePlotTE: null,
+                    reflectancePlotTM: null,
                     numberOfPairs: 2,
-                    enablePairs: false
+                    enablePairs: false,
+                    spectralAngle: 0
                 };
             },
             methods: {
@@ -322,31 +391,48 @@
                     const angles = Array.from({length: 91}, (_, i) => i);
                     
                     // Calculate data for all wavelengths and angles
-                    const transmittanceData = [];
-                    const reflectanceData = [];
+                    const transmittanceDataTE = [];
+                    const reflectanceDataTE = [];
+                    const transmittanceDataTM = [];
+                    const reflectanceDataTM = [];
                     for (let angle of angles) {
-                        const transmittanceRow = [];
-                        const reflectanceRow = [];
+                        const transmittanceRowTE = [];
+                        const reflectanceRowTE = [];
+                        const transmittanceRowTM = [];
+                        const reflectanceRowTM = [];
                         for (let wavelength of wavelengths) {
-                            const { R, T } = calculateRT(layers, wavelength, angle, this.polarization);
-                            transmittanceRow.push(T);
-                            reflectanceRow.push(R);
+                            const { R, T } = calculateRT(layers, wavelength, angle, { TE: true, TM: false });
+                            transmittanceRowTE.push(T);
+                            reflectanceRowTE.push(R);
+                            const { R: RTM, T: TTM } = calculateRT(layers, wavelength, angle, { TE: false, TM: true });
+                            transmittanceRowTM.push(TTM);
+                            reflectanceRowTM.push(RTM);
                         }
-                        transmittanceData.push(transmittanceRow);
-                        reflectanceData.push(reflectanceRow);
+                        transmittanceDataTE.push(transmittanceRowTE);
+                        reflectanceDataTE.push(reflectanceRowTE);
+                        transmittanceDataTM.push(transmittanceRowTM);
+                        reflectanceDataTM.push(reflectanceRowTM);
                     }
 
-                    // Calculate normal incidence data
-                    const normalData = wavelengths.map(wavelength => {
-                        const { R, T } = calculateRT(layers, wavelength, 0, this.polarization);
+                    // Calculate spectral response data at the selected angle
+                    const normalDataTE = wavelengths.map(wavelength => {
+                        const { R, T } = calculateRT(layers, wavelength, this.spectralAngle, { TE: true, TM: false });
                         return { wavelength, R, T };
                     });
 
-                    this.updateNormalPlot(normalData);
-                    this.updateTransmittancePlot(wavelengths, angles, transmittanceData);
-                    this.updateReflectancePlot(wavelengths, angles, reflectanceData);
+                    const normalDataTM = wavelengths.map(wavelength => {
+                        const { R, T } = calculateRT(layers, wavelength, this.spectralAngle, { TE: false, TM: true });
+                        return { wavelength, R, T };
+                    });
+
+                    this.updateNormalPlot(normalDataTE, 'TE');
+                    this.updateNormalPlot(normalDataTM, 'TM');
+                    this.updateTransmittancePlot(wavelengths, angles, transmittanceDataTE, 'TE');
+                    this.updateTransmittancePlot(wavelengths, angles, transmittanceDataTM, 'TM');
+                    this.updateReflectancePlot(wavelengths, angles, reflectanceDataTE, 'TE');
+                    this.updateReflectancePlot(wavelengths, angles, reflectanceDataTM, 'TM');
                 },
-                updateNormalPlot(data) {
+                updateNormalPlot(data, polarization) {
                     const trace1 = {
                         x: data.map(d => d.wavelength),
                         y: data.map(d => d.R),
@@ -364,7 +450,7 @@
                     };
 
                     const layout = {
-                        title: 'Spectral Response',
+                        title: `Spectral Response at ${this.spectralAngle}° (${polarization})`,
                         xaxis: {
                             title: 'Wavelength (nm)'
                         },
@@ -380,9 +466,9 @@
                         }
                     };
 
-                    Plotly.newPlot(this.$refs.normalPlot, [trace1, trace2], layout);
+                    Plotly.newPlot(this.$refs[`normalPlot${polarization.toUpperCase()}`], [trace1, trace2], layout);
                 },
-                updateTransmittancePlot(wavelengths, angles, data) {
+                updateTransmittancePlot(wavelengths, angles, data, polarization) {
                     const trace = {
                         z: data,
                         x: wavelengths,
@@ -395,7 +481,7 @@
                     };
 
                     const layout = {
-                        title: 'Spectral Angular Transmittance',
+                        title: `Spectral Angular Transmittance (${polarization})`,
                         xaxis: {
                             title: 'Wavelength (nm)'
                         },
@@ -404,9 +490,9 @@
                         }
                     };
 
-                    Plotly.newPlot(this.$refs.transmittancePlot, [trace], layout);
+                    Plotly.newPlot(this.$refs[`transmittancePlot${polarization.toUpperCase()}`], [trace], layout);
                 },
-                updateReflectancePlot(wavelengths, angles, data) {
+                updateReflectancePlot(wavelengths, angles, data, polarization) {
                     const trace = {
                         z: data,
                         x: wavelengths,
@@ -419,7 +505,7 @@
                     };
 
                     const layout = {
-                        title: 'Spectral Angular Reflectance',
+                        title: `Spectral Angular Reflectance (${polarization})`,
                         xaxis: {
                             title: 'Wavelength (nm)'
                         },
@@ -428,11 +514,34 @@
                         }
                     };
 
-                    Plotly.newPlot(this.$refs.reflectancePlot, [trace], layout);
+                    Plotly.newPlot(this.$refs[`reflectancePlot${polarization.toUpperCase()}`], [trace], layout);
                 }
             },
             mounted() {
                 this.calculate();
+            },
+            watch: {
+                spectralAngle() {
+                    // Only update the normal plot when angle changes
+                    const wavelengths = generateWavelengthArray(
+                        this.wavelengthRange.start,
+                        this.wavelengthRange.end,
+                        this.wavelengthRange.points
+                    );
+                    
+                    const normalDataTE = wavelengths.map(wavelength => {
+                        const { R, T } = calculateRT(this.layers, wavelength, this.spectralAngle, { TE: true, TM: false });
+                        return { wavelength, R, T };
+                    });
+
+                    const normalDataTM = wavelengths.map(wavelength => {
+                        const { R, T } = calculateRT(this.layers, wavelength, this.spectralAngle, { TE: false, TM: true });
+                        return { wavelength, R, T };
+                    });
+
+                    this.updateNormalPlot(normalDataTE, 'TE');
+                    this.updateNormalPlot(normalDataTM, 'TM');
+                }
             }
         };
 
