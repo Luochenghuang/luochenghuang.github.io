@@ -268,19 +268,6 @@ button:disabled {
     import { calculateRT, generateWavelengthArray } from '/assets/js/tmm/TMMCalculator.js';
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
-    // Debounce function
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
     const TMMApp = {
         template: `
             <div class="tmm-app">
@@ -385,9 +372,9 @@ button:disabled {
         data() {
             return {
                 wavelengthRange: {
-                    start: 550,
+                    start: 460,
                     end: 700,
-                    points: 100
+                    points: 200
                 },
                 layers: [
                     { n: 1.0, k: 0, d: 0 },  // Air
@@ -403,12 +390,14 @@ button:disabled {
                 numberOfPairs: 2,
                 enablePairs: false,
                 spectralAngle: 0,
-                debouncedUpdate: null
+                transmittanceDataTE: [],
+                reflectanceDataTE: [],
+                transmittanceDataTM: [],
+                reflectanceDataTM: []
             };
         },
         created() {
-            // Create debounced version of updateNormalPlots
-            this.debouncedUpdate = debounce(this.updateNormalPlots, 50);
+            // Remove debounce initialization
         },
         mounted() {
             // Trigger initial calculation when component is mounted
@@ -455,10 +444,11 @@ button:disabled {
                 const angles = Array.from({length: 91}, (_, i) => i);
                 
                 // Calculate data for all wavelengths and angles
-                const transmittanceDataTE = [];
-                const reflectanceDataTE = [];
-                const transmittanceDataTM = [];
-                const reflectanceDataTM = [];
+                this.transmittanceDataTE = [];
+                this.reflectanceDataTE = [];
+                this.transmittanceDataTM = [];
+                this.reflectanceDataTM = [];
+                
                 for (let angle of angles) {
                     const transmittanceRowTE = [];
                     const reflectanceRowTE = [];
@@ -472,29 +462,18 @@ button:disabled {
                         transmittanceRowTM.push(TTM);
                         reflectanceRowTM.push(RTM);
                     }
-                    transmittanceDataTE.push(transmittanceRowTE);
-                    reflectanceDataTE.push(reflectanceRowTE);
-                    transmittanceDataTM.push(transmittanceRowTM);
-                    reflectanceDataTM.push(reflectanceRowTM);
+                    this.transmittanceDataTE.push(transmittanceRowTE);
+                    this.reflectanceDataTE.push(reflectanceRowTE);
+                    this.transmittanceDataTM.push(transmittanceRowTM);
+                    this.reflectanceDataTM.push(reflectanceRowTM);
                 }
 
-                // Calculate spectral response data at the selected angle
-                const normalDataTE = wavelengths.map(wavelength => {
-                    const { R, T } = calculateRT(layers, wavelength, this.spectralAngle, { TE: true, TM: false });
-                    return { wavelength, R, T };
-                });
-
-                const normalDataTM = wavelengths.map(wavelength => {
-                    const { R, T } = calculateRT(layers, wavelength, this.spectralAngle, { TE: false, TM: true });
-                    return { wavelength, R, T };
-                });
-
-                this.updateNormalPlot(normalDataTE, 'TE');
-                this.updateNormalPlot(normalDataTM, 'TM');
-                this.updateTransmittancePlot(wavelengths, angles, transmittanceDataTE, 'TE');
-                this.updateTransmittancePlot(wavelengths, angles, transmittanceDataTM, 'TM');
-                this.updateReflectancePlot(wavelengths, angles, reflectanceDataTE, 'TE');
-                this.updateReflectancePlot(wavelengths, angles, reflectanceDataTM, 'TM');
+                // Update all plots
+                this.updateNormalPlots();
+                this.updateTransmittancePlot(wavelengths, angles, this.transmittanceDataTE, 'TE');
+                this.updateTransmittancePlot(wavelengths, angles, this.transmittanceDataTM, 'TM');
+                this.updateReflectancePlot(wavelengths, angles, this.reflectanceDataTE, 'TE');
+                this.updateReflectancePlot(wavelengths, angles, this.reflectanceDataTM, 'TM');
             },
             updateNormalPlot(data, polarization) {
                 const trace1 = {
@@ -599,8 +578,8 @@ button:disabled {
                 // Ensure the angle stays within bounds
                 if (this.spectralAngle < 0) this.spectralAngle = 0;
                 if (this.spectralAngle > 90) this.spectralAngle = 90;
-                // Use debounced update for smoother slider experience
-                this.debouncedUpdate();
+                // Update plots immediately
+                this.updateNormalPlots();
             },
             updateNormalPlots() {
                 const wavelengths = generateWavelengthArray(
@@ -609,16 +588,21 @@ button:disabled {
                     this.wavelengthRange.points
                 );
 
-                // Calculate spectral response data at the selected angle
-                const normalDataTE = wavelengths.map(wavelength => {
-                    const { R, T } = calculateRT(this.layers, wavelength, this.spectralAngle, { TE: true, TM: false });
-                    return { wavelength, R, T };
-                });
+                // Get the index of the selected angle
+                const angleIndex = this.spectralAngle;
 
-                const normalDataTM = wavelengths.map(wavelength => {
-                    const { R, T } = calculateRT(this.layers, wavelength, this.spectralAngle, { TE: false, TM: true });
-                    return { wavelength, R, T };
-                });
+                // Slice the existing 2D data at the selected angle
+                const normalDataTE = wavelengths.map((wavelength, i) => ({
+                    wavelength,
+                    R: this.reflectanceDataTE[angleIndex][i],
+                    T: this.transmittanceDataTE[angleIndex][i]
+                }));
+
+                const normalDataTM = wavelengths.map((wavelength, i) => ({
+                    wavelength,
+                    R: this.reflectanceDataTM[angleIndex][i],
+                    T: this.transmittanceDataTM[angleIndex][i]
+                }));
 
                 this.updateNormalPlot(normalDataTE, 'TE');
                 this.updateNormalPlot(normalDataTM, 'TM');
