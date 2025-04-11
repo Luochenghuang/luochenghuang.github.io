@@ -6,6 +6,42 @@ description: Calculates transmission and reflection coefficients for multilayer 
 nav: false
 ---
 
+<details>
+<summary>Basic Usage Guide</summary>
+<div style="padding: 10px;">
+<p>To simulate a multilayer structure:</p>
+
+<p>Set the wavelength range and number of spectral points.</p>
+
+<p>Add layers between the semi-infinite media (air):<br>
+   *Click "Add Layer" to add intermediate layers;<br>
+   *For each layer, set refractive index (n), extinction coefficient (k) and thickness in nm.</p>
+
+<p>View the results:<br>
+   *Six plots show the optical response for both TE and TM polarizations;<br>
+   *Use the angle slider to change the incident angle;<br>
+   *Heatmaps show wavelength-angle dependence;</p>
+
+<p>Key terms:<br>
+   *TE: Electric field perpendicular to plane of incidence;<br>
+   *TM: Magnetic field perpendicular to plane of incidence;<br>
+   *R: Fraction of light reflected;<br>
+   *T: Fraction of light transmitted;</p>
+</div>
+</details>
+
+<details>
+<summary>How to use paired layers feature</summary>
+<div style="padding: 10px;">
+<p>To create periodic structures (e.g., DBR):</p>
+
+<p>Add the layers you want to repeat<br>
+Check "Add to pair" for these layers<br>
+Enable "Enable Pairs"<br>
+Set the number of repetitions</p>
+</div>
+</details>
+
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
@@ -612,3 +648,73 @@ button:disabled {
 
     createApp(TMMApp).mount('#app');
 </script>
+
+## Technical Details
+
+Here, we use the Transfer Matrix Method (TMM) to analyze the propagation of electromagnetic waves through the multilayer structures. The following describes the implementation details.
+
+**Wave Propagation in Each Layer**
+   - In each layer, the electric field can be expressed as a superposition of forward and backward propagating waves:
+     $$
+     E(z) = A e^{ikz} + B e^{-ikz}
+     $$
+   - Where $$k = \frac{2\pi n}{\lambda}$$ is the wave vector, $$n$$ is the complex refractive index, and $$\lambda$$ is the wavelength.
+
+**Boundary Conditions**
+   - At each interface between layers, the tangential components of the electric and magnetic fields must be continuous.
+   - For TE polarization (s-polarization), the electric field is perpendicular to the plane of incidence.
+   - For TM polarization (p-polarization), the magnetic field is perpendicular to the plane of incidence.
+
+**Transfer Matrix Formalism**
+   - The relationship between the fields in adjacent layers can be described by a transfer matrix:
+     $$
+     \begin{pmatrix}
+     A_{j+1} \\
+     B_{j+1}
+     \end{pmatrix}
+     = M_j
+     \begin{pmatrix}
+     A_j \\
+     B_j
+     \end{pmatrix}
+     $$
+   - Where $$M_j$$ is the transfer matrix for the j-th layer, which accounts for both propagation through the layer and reflection/transmission at interfaces.
+
+**Matrix Components**
+   - For a layer with thickness $$d$$ and refractive index $$n$$, the transfer matrix is:
+     $$
+     M_j = 
+     \begin{pmatrix}
+     e^{ik_jd_j} & 0 \\
+     0 & e^{-ik_jd_j}
+     \end{pmatrix}
+     \begin{pmatrix}
+     1 & r_j \\
+     r_j & 1
+     \end{pmatrix}
+     $$
+   - Where $$r_j$$ is the Fresnel reflection coefficient at the interface.
+
+**Fresnel Coefficients**
+   - For TE polarization:
+     $$
+     r_{TE} = \frac{n_1\cos\theta_1 - n_2\cos\theta_2}{n_1\cos\theta_1 + n_2\cos\theta_2}
+     $$
+   - For TM polarization:
+     $$
+     r_{TM} = \frac{n_2\cos\theta_1 - n_1\cos\theta_2}{n_2\cos\theta_1 + n_1\cos\theta_2}
+     $$
+   - Where $$\theta_1$$ and $$\theta_2$$ are the angles of incidence and refraction, related by Snell's law: $$n_1\sin\theta_1 = n_2\sin\theta_2$$.
+
+**Total Transfer Matrix**
+   - The total transfer matrix for a multilayer structure is the product of individual layer matrices:
+     $$
+     M_{total} = M_N \cdot M_{N-1} \cdots M_1
+     $$
+
+**Reflection and Transmission Coefficients**
+   - The overall reflection and transmission coefficients can be extracted from the total transfer matrix:
+     $$
+     R = \left|\frac{B_0}{A_0}\right|^2, \quad T = \left|\frac{A_N}{A_0}\right|^2
+     $$
+   - Where $$A_0$$ and $$B_0$$ are the incident and reflected field amplitudes in the first layer, and $$A_N$$ is the transmitted field amplitude in the last layer.
